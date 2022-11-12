@@ -155,6 +155,9 @@ public class SurfaceScanner {
         return this.probePositionGrid;
     }
 
+    public final void setProbePositionGrid(Position[][] grid) {
+        this.probePositionGrid = grid;
+    }
     public double getProbeDistance() {
         return this.probeDistance;
     }

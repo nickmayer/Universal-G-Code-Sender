@@ -19,9 +19,8 @@
 package com.willwinder.ugs.platform.surfacescanner;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import com.willwinder.ugs.nbm.visualizer.shared.RenderableUtils;
 import com.willwinder.ugs.nbp.lib.lookup.CentralLookup;
 import com.willwinder.ugs.nbp.lib.services.LocalizingService;
@@ -55,12 +54,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import static com.willwinder.ugs.nbp.lib.services.LocalizingService.lang;
+import static com.willwinder.universalgcodesender.utils.GUIHelpers.displayErrorDialog;
 
 /**
  * Top component which displays something.
@@ -83,7 +80,6 @@ public final class AutoLevelerTopComponent extends TopComponent implements ItemL
 
     private AutoLevelPreview r;
     private SurfaceScanner scanner;
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     // Used to disable the change listener temporarily.
     private boolean bulkChanges = false;
@@ -576,26 +572,29 @@ public final class AutoLevelerTopComponent extends TopComponent implements ItemL
     }//GEN-LAST:event_scanSurfaceButtonActionPerformed
 
     private void dataViewerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dataViewerActionPerformed
-        List<Map<String, Double>> probeData = new ArrayList<>();
-
-        // Collect data from grid.
-        if (scanner != null && scanner.getProbePositionGrid() != null) {
-            for (Position[] row : scanner.getProbePositionGrid()) {
-                for (Position p : row) {
-                    if (p != null) {
-                        probeData.add(ImmutableMap.of(
-                                "x", p.x,
-                                "y", p.y,
-                                "z", p.z
-                        ));
-                    }
-                }
-            }
-        }
+        JsonSerializer<Position> positionSerializer = (position, type, jsonSerializationContext) -> {
+            JsonObject j = new JsonObject();
+            j.addProperty("x", position.getX());
+            j.addProperty("y", position.getY());
+            j.addProperty("z", position.getZ());
+            return j;
+        };
+        Gson GSON = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(Position.class, positionSerializer).create();
 
         JTextArea ta = new JTextArea(15, 30);
-        ta.setText(GSON.toJson(probeData));
-        JOptionPane.showMessageDialog(null, new JScrollPane(ta));
+        ta.setText(GSON.toJson(scanner.getProbePositionGrid()));
+        int result = JOptionPane.showConfirmDialog(null, new JScrollPane(ta),
+                Localization.getString("autoleveler.panel.view-data"),
+                JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                Position[][] updated = GSON.fromJson(ta.getText(),
+                        new TypeToken<Position[][]>() {}.getType());
+                scanner.setProbePositionGrid(updated);
+            } catch (JsonSyntaxException ex) {
+                displayErrorDialog(ex.getMessage());
+            }
+        }
     }//GEN-LAST:event_dataViewerActionPerformed
 
     private void applyToGcodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyToGcodeActionPerformed
