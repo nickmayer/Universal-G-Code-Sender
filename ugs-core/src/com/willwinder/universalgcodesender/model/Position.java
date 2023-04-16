@@ -19,7 +19,6 @@
 package com.willwinder.universalgcodesender.model;
 
 import com.willwinder.universalgcodesender.model.UnitUtils.Units;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Objects;
 
@@ -71,7 +70,7 @@ public class Position extends CNCPoint {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return "[" + super.toString() + " " + units.toString() + "]";
     }
 
     /**
@@ -99,25 +98,6 @@ public class Position extends CNCPoint {
     public Position getPositionIn(Units units) {
         double scale = UnitUtils.scaleUnits(this.units, units);
         return new Position(x * scale, y * scale, z * scale, a, b, c, units);
-    }
-
-    public double get(Axis axis) {
-        switch (axis) {
-            case X:
-                return getX();
-            case Y:
-                return getY();
-            case Z:
-                return getZ();
-            case A:
-                return getA();
-            case B:
-                return getB();
-            case C:
-                return getC();
-            default:
-                return 0;
-        }
     }
 
     /**
@@ -156,19 +136,29 @@ public class Position extends CNCPoint {
                 (c != 0 && !Double.isNaN(c));
     }
 
-    public void set(Axis axis, double value) {
+    public Position set(Axis axis, double value) {
         switch (axis) {
             case X:
                 setX(value);
-                break;
+                return this;
             case Y:
                 setY(value);
-                break;
+                return this;
             case Z:
                 setZ(value);
-                break;
-            default:
+                return this;
+            case A:
+                setA(value);
+                return this;
+            case B:
+                setB(value);
+                return this;
+            case C:
+                setC(value);
+                return this;
         }
+
+        throw new IllegalArgumentException("Unexpected Axis " + axis);
     }
 
     /**
@@ -187,5 +177,25 @@ public class Position extends CNCPoint {
                 center.y + (-sinA * (x - center.x) + cosA * (y - center.y)),
                 z,
                 units);
+    }
+
+    /**
+     * Add the value of other to this for each axis.
+     */
+    public Position add(Position other)
+    {
+        double scaler = UnitUtils.scaleUnits(units, other.units);
+        this.x = x + other.x * scaler;
+        this.y = y + other.y * scaler;
+        this.z = z + other.z * scaler;
+        this.a = a + other.a * scaler;
+        this.b = b + other.b * scaler;
+        this.c = c + other.c * scaler;
+        return this;
+    }
+
+    public Position add(Axis axis, Double move, Units moveUnits) {
+        this.set(axis, this.get(axis) + move * UnitUtils.scaleUnits(moveUnits, units));
+        return this;
     }
 }

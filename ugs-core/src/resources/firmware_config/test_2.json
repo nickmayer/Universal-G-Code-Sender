@@ -1,6 +1,6 @@
 {
     "Name": "Testing (Delay)",
-    "Version": 5,
+    "Version": 6,
     "Controller": {
         "name": "Loopback_Slow",
         "args": null
@@ -28,6 +28,19 @@
                 "optional": true,
                 "args": {
                     "segmentLengthMM": 1.3
+                }
+            },{
+                "name": "BacklashCompensationProcessor",
+                "enabled": false,
+                "optional": true,
+                "args": {
+                    "init_x": 1,
+                    "x": 0,
+                    "init_y": 1,
+                    "y": 0,
+                    "init_z": 5,
+                    "z": 0,
+                    "feed_rate": 1000
                 }
             }
         ],

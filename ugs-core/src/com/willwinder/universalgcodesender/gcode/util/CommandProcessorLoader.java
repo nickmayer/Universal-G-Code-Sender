@@ -22,18 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.willwinder.universalgcodesender.gcode.processors.ArcExpander;
-import com.willwinder.universalgcodesender.gcode.processors.CommandLengthProcessor;
-import com.willwinder.universalgcodesender.gcode.processors.CommandProcessor;
-import com.willwinder.universalgcodesender.gcode.processors.CommentProcessor;
-import com.willwinder.universalgcodesender.gcode.processors.DecimalProcessor;
-import com.willwinder.universalgcodesender.gcode.processors.EmptyLineRemoverProcessor;
-import com.willwinder.universalgcodesender.gcode.processors.FeedOverrideProcessor;
-import com.willwinder.universalgcodesender.gcode.processors.LineSplitter;
-import com.willwinder.universalgcodesender.gcode.processors.M30Processor;
-import com.willwinder.universalgcodesender.gcode.processors.PatternRemover;
-import com.willwinder.universalgcodesender.gcode.processors.SpindleOnDweller;
-import com.willwinder.universalgcodesender.gcode.processors.WhitespaceProcessor;
+import com.willwinder.universalgcodesender.gcode.processors.*;
 import com.willwinder.universalgcodesender.i18n.Localization;
 import com.willwinder.universalgcodesender.utils.ControllerSettings.ProcessorConfig;
 
@@ -224,6 +213,15 @@ public class CommandProcessorLoader {
             case "ArcExpander":
                 double length = pc.args.get("segmentLengthMM").getAsDouble();
                 return Optional.of(new ArcExpander(true, length));
+            case "BacklashCompensationProcessor":
+                return Optional.of(new BacklashCompensationProcessor(
+                        pc.args.get("x").getAsDouble(),
+                        pc.args.get("y").getAsDouble(),
+                        pc.args.get("z").getAsDouble(),
+                        pc.args.get("init_x").getAsDouble(),
+                        pc.args.get("init_y").getAsDouble(),
+                        pc.args.get("init_z").getAsDouble(),
+                        pc.args.get("feed_rate").getAsDouble()));
             case "CommandLengthProcessor":
                 int commandLength = pc.args.get("commandLength").getAsInt();
                 return Optional.of(new CommandLengthProcessor(commandLength));

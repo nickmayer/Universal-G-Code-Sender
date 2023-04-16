@@ -147,6 +147,28 @@ public class CNCPoint {
   }
 
   /**
+   * Copies return the value for the given axis
+   */
+  public double get(Axis axis) {
+    switch (axis) {
+      case X:
+        return getX();
+      case Y:
+        return getY();
+      case Z:
+        return getZ();
+      case A:
+        return getA();
+      case B:
+        return getB();
+      case C:
+        return getC();
+    }
+
+    throw new IllegalArgumentException("Unexpected Axis " + axis);
+  }
+
+  /**
    * Copies the x,y,z coordinates of this tuple into the array t
    * of length 3.
    * @param t  the target array 
@@ -314,12 +336,17 @@ public class CNCPoint {
 
   /**
    * Returns a string that contains the values of this CNCPoint.
-   * The form is (x,y,z:a,b,c).
+   * The form is (x, y, z: a,b,c) if a,b,c are valid, and is
+   * otherwise (x, y, z).
    * @return the String representation
    */  
   @Override
   public String toString() {
-    return "(" + this.x + ", " + this.y + ", " + this.z + ": " + this.a + "," + this.b + "," + this.c + ")";
+    if (Double.isNaN(a) && Double.isNaN(b) && Double.isNaN(c)) {
+      return "(" + this.x + ", " + this.y + ", " + this.z + ")";
+    } else {
+      return "(" + this.x + ", " + this.y + ", " + this.z + ": " + this.a + "," + this.b + "," + this.c + ")";
+    }
   }
 
   /**
